@@ -1,105 +1,49 @@
-# ocmodel
+# Bingo
 
-Pick an OpenCode model with `fzf` and open it in a new `psmux` tab. The picker
-can be reopened from any pane with a psmux prefix key.
+Bingo is a Java/TamboUI rewrite of the model switcher. It keeps the Pi, Codex,
+Antigravity (`agy`), and OpenCode model discovery and launch paths, plus model
+caching, psmux/tmux tabs, duplicate-window selection, and prefix+key/F8 binding
+installation. The interactive selector is implemented in TamboUI, with live
+fuzzy filtering and arrow-key navigation without an external picker process.
 
-## Requirements
+## Run
 
-- Go (to build this program)
-- [psmux](https://github.com/psmux/psmux) 3.x on Windows; tmux on Linux/macOS
-  (psmux is Windows-only, and ocmodel auto-selects tmux when psmux is missing)
-- OpenCode CLI (`opencode models` must work)
-- fzf
+From this directory:
 
-## Prerequisite install scripts
-
-Run the script for your platform; each one installs Go, the multiplexer, fzf,
-and the OpenCode CLI, and is safe to rerun:
-
-```powershell
-# Windows (PowerShell)
-.\scripts\install-prereqs-windows.ps1
+```shell
+mvn compile exec:java
 ```
 
-```bash
-# Linux
-bash scripts/install-prereqs-linux.sh
+That starts the default flow: pick a model inside psmux/tmux, or bootstrap and
+attach to the `bingo` session when run outside a multiplexer. Commands can
+be supplied to the application through Maven:
 
-# macOS
-bash scripts/install-prereqs-macos.sh
+```shell
+mvn compile exec:java -Dexec.args="help"
+mvn compile exec:java -Dexec.args="install"
+mvn compile exec:java -Dexec.args="models"
+mvn compile exec:java -Dexec.args="pick --dir ."
 ```
 
-Set `OCMODEL_PSMUX` if you need to override the auto-detected multiplexer.
+After upgrading from the former `ocmodel` launcher, run the `install` command
+once to replace its old psmux key binding with Bingo's current Maven launcher.
 
-## Build and install
+Use `--session`, `--key`, `--dir`, `--pi`, `--codex`, `--agy`, `--opencode`,
+`--psmux`, `--namespace`, and `--maven` to override defaults. Environment overrides are
+`BINGO_PI`, `BINGO_CODEX`, `BINGO_AGY`, `BINGO_OPENCODE`,
+`BINGO_SESSION`, `BINGO_KEY`, `BINGO_PSMUX`, `BINGO_NAMESPACE`, and
+`BINGO_MAVEN`.
 
-```powershell
-# Windows
-go build -o ocmodel.exe .
-.\ocmodel.exe install          # binds prefix+m in ~/.psmux.conf and live sessions
-```
+The picker opens its TamboUI loading view before model discovery starts. On a
+cache miss, agent CLIs are queried concurrently and each provider's models
+appear as soon as that provider responds, so you can select without waiting for
+the slowest CLI. Partial results are cached for reuse and refreshed in the
+background. The cache is per user, CLI configuration, and working directory;
+complete results are fresh for two minutes.
 
-```bash
-# Linux/macOS
-go build -o ocmodel .
-./ocmodel install              # binds prefix+m in ~/.tmux.conf and live sessions
-```
+Bingo launches Pi in fullscreen TUI mode so the mouse wheel scrolls the chat
+transcript inside Pi. Pi's regular mode uses terminal scrollback instead.
 
-## Use
-
-```powershell
-.\ocmodel.exe                  # start/attach the "ocmodels" session and pick a model
-```
-
-Then, from **any** multiplexer tab (psmux on Windows, tmux on Unix):
-
-- press `prefix+m` to open the fzf model picker in a new tab
-- select a model → a new tab runs OpenCode with that model selected
-- the picker tab closes itself automatically
-- press `prefix+m` again to launch another model in another tab of the **same** multiplexer session
-- selecting a model that is already open switches back to that existing tab instead of creating a duplicate
-
-For example: select `opencode/nemotron-3.5-lightning-free`, then press `prefix+m`
-and select `opencode/big-pickle`. Both OpenCode tabs stay open side by side in
-the same multiplexer session, each with its own model. Selecting `beam-free` again
-later routes you straight back to the already-open `beam-free` tab.
-
-You can also run `ocmodel` directly inside a multiplexer pane; in that case the pane is
-left open and only the new OpenCode tab is created.
-
-## How the model is applied
-
-By default each tab runs `opencode mini --model <model>`. The mini interface
-does not show OpenCode's shared session bar, so tabs in the same directory stay
-visually isolated.
-
-The full OpenCode TUI does not accept `--model`. With `--full` (or
-`OCMODEL_MINI=0`), `ocmodel` instead creates an OpenCode session through
-`opencode api post /api/session` with the selected `provider/model`, then opens
-it with `opencode --session <id> <dir>`. OpenCode caches sessions per directory,
-so the full TUI will show the other sessions from that folder in its tab bar.
-
-## Options
-
-| Flag | Env | Meaning |
-| --- | --- | --- |
-| `--session`, `-s` | `OCMODEL_SESSION` | multiplexer session name (default `ocmodels`) |
-| `--key`, `-k` | `OCMODEL_KEY` | prefix key for the picker binding (default `m`) |
-| `--dir`, `-d` | — | working directory for the new OpenCode tab |
-| `--mini` | `OCMODEL_MINI=1` | use `opencode mini --model` (default) |
-| `--full` | `OCMODEL_MINI=0` | use the full OpenCode TUI with a session API object |
-| `--fzf` | `OCMODEL_FZF` | explicit fzf path |
-| `--psmux` | `OCMODEL_PSMUX` | multiplexer path (auto: psmux on Windows, tmux on Unix) |
-| `--opencode` | `OCMODEL_OPENCODE` | explicit opencode path |
-| `--namespace`, `-L` | `OCMODEL_NAMESPACE` | multiplexer `-L` socket namespace |
-
-Subcommands: `pick`, `open`, `install`, `models`, `help`.
-
-## Development
-
-```powershell
-go test ./...
-go vet ./...
-```
-
-`AGENTS.md` contains a one-line log of every feature and fix.
+TamboUI currently publishes snapshot releases, so the Maven project uses its
+official Central Portal snapshot repository and pins the documented
+`0.8.0-SNAPSHOT` BOM.

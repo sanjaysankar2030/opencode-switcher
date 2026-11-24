@@ -35,3 +35,30 @@ Implementation log — one line per feature or fix, newest last.
 - 2026-11-19: Added automatic tmux selection on Linux/macOS where psmux is unavailable.
 - 2026-11-19: Added reusable prerequisite install scripts for Windows, Linux, and macOS.
 - 2026-11-19: Documented the platform prerequisite scripts and tmux behavior in the README.
+- 2026-11-20: Replaced OpenCode model discovery and session launching with Pi `--list-models` and `--model` (`main.go`, `models.go`, `config.go`, `fzf.go`, `README.md`).
+- 2026-11-20: Fixed Pi model discovery to pass `--list-models` as an argument instead of treating a shell pipe as an argument (`models.go`).
+- 2026-11-20: Filtered Pi model choices to include only selectors ending in `:free` (`models.go`, `main_test.go`).
+- 2026-11-20: Added an F8 picker shortcut for full-screen apps and enabled extended key reporting for Pi (`config.go`, `README.md`).
+- 2026-11-20: Added Codex model discovery and model-specific Codex tab launching alongside Pi (`models.go`, `main.go`, `config.go`, `fzf.go`, `README.md`).
+- 2026-11-20: Added Antigravity model discovery with `agy models` and model-specific tab launching (`models.go`, `main.go`, `config.go`, `README.md`).
+- 2026-11-20: Added OpenCode model discovery with `opencode models` and `mini --model` tab launching (`models.go`, `main.go`, `config.go`, `README.md`).
+- 2026-11-20: Ran agent model discovery concurrently and added per-directory stale-while-revalidate model caching to speed repeated picker launches (`models.go`, `main.go`, `README.md`).
+- 2026-11-20: Added the Java/TamboUI Maven rewrite under `bingo/`, preserving model discovery, caching, psmux tabs, and bindings (`bingo/`).
+- 2026-11-20: Made the Bingo model picker enter TamboUI immediately and stream concurrent provider results into its loading view (`bingo/src/main/java/dev/bingo/`).
+- 2026-11-20: Removed the Go implementation and renamed the active Java project, package, session, and environment overrides to Bingo.
+- 2026-11-20: Made binding installation replace the legacy `ocmodel` config block so old executable paths are removed during migration (`BindingInstaller.java`).
+- 2026-11-20: Fixed the Windows psmux binding to invoke `mvn.cmd` through PowerShell's call operator with a single Maven `exec.args` value (`BindingInstaller.java`).
+- 2026-11-20: Removed Maven compilation from each generated picker binding launch to reduce startup delay (`BindingInstaller.java`).
+- 2026-11-20: Added a bounded initial loading screen, shared model cache across project folders, longer cache freshness, and offline Maven launch for faster picker startup (`TuiPicker.java`, `ModelService.java`, `BindingInstaller.java`).
+- 2026-11-20: Replaced the plain startup message with an animated Bingo splash showing background model loading status (`TuiPicker.java`).
+- 2026-11-22: Kept the startup splash visible until model discovery returns the first choices, then revealed the searchable model selector (`TuiPicker.java`).
+- 2026-11-22: Kept the animated startup splash visible for at least five seconds while model discovery runs, then revealed the searchable selector with any models found (`TuiPicker.java`).
+- 2026-11-22: Filtered OpenCode choices to Google models and selectors marked `:free`, including cached catalogs (`ModelService.java`).
+- 2026-11-22: Tightened OpenCode filtering to show only selectors marked `:free`, including Google's free models (`ModelService.java`).
+- 2026-11-22: Included OpenCode's unsuffixed Big Pickle and `-free` models while retaining `:free` variants from Google and other providers (`ModelService.java`).
+- 2026-11-22: Enabled psmux mouse reporting so scroll-wheel events reach Pi's TUI (`BindingInstaller.java`).
+- 2026-11-22: Launched Pi in fullscreen TUI mode so mouse-wheel scrolling moves through the chat transcript (`Main.java`, `README.md`).
+- 2026-11-23: Added an on-demand Ctrl+R availability check across every discovered model using one-character prompts and bounded concurrency (ModelAvailabilityChecker.java, TuiPicker.java, README.md).
+- 2026-11-23: Fixed AGY check prompt argument parsing and surfaced concise authentication, CLI, and timeout failure reasons in picker rows (ModelAvailabilityChecker.java, TuiPicker.java, README.md).
+- 2026-11-23: Corrected provider-specific check flags, isolated OpenCode checks from project tools/instructions, recognized provider 429s, and made costly Codex probes opt-in (ModelAvailabilityChecker.java, TuiPicker.java, README.md).
+- 2026-11-24: Removed the on-demand model availability checks from the picker and documentation; deferred the feature to the backlog (TuiPicker.java, ModelAvailabilityChecker.java, README.md).
